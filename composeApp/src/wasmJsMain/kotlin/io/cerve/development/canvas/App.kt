@@ -1,34 +1,139 @@
 package io.cerve.development.canvas
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Button
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Draw
+import androidx.compose.material.icons.outlined.Brush
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
-
-import canvas.composeapp.generated.resources.Res
-import canvas.composeapp.generated.resources.compose_multiplatform
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.animation.AnimatedVisibility
+import com.cerve.development.ui.canvas.component.CerveDrawCanvas
+import com.cerve.development.ui.canvas.model.CerveCanvasInteractionType
+import com.cerve.development.ui.canvas.operators.rememberCerveDrawCanvasState
 
 @Composable
 fun App() {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+        val canvas = rememberCerveDrawCanvasState()
+
+        Scaffold(
+            modifier = Modifier,
+            bottomBar = {
+                BottomAppBar(containerColor = Color.Transparent) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        BadgedBox(
+                            badge = {
+                                androidx.compose.animation.AnimatedVisibility(canvas.interactionType == null) {
+                                    Badge {
+                                        Text(
+                                            modifier = Modifier.padding(5.dp),
+                                            text = "select"
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
+                            IconButton(
+                                colors = if (canvas.interactionType == CerveCanvasInteractionType.Brush) {
+                                    IconButtonDefaults.filledIconButtonColors()
+                                } else IconButtonDefaults.iconButtonColors(),
+                                onClick = { canvas.onChangeInteractionType(CerveCanvasInteractionType.Brush) }
+                            ) {
+                                Icon(
+                                    modifier = Modifier,
+                                    imageVector = Icons.Default.Draw,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+
+                        IconButton(
+                            colors = if (canvas.interactionType == CerveCanvasInteractionType.SegmentedBrush) {
+                                IconButtonDefaults.filledIconButtonColors()
+                            } else IconButtonDefaults.iconButtonColors(),
+                            onClick = { canvas.onChangeInteractionType(CerveCanvasInteractionType.SegmentedBrush) }
+                        ) {
+                            Icon(
+                                modifier = Modifier,
+                                imageVector = Icons.Outlined.Brush,
+                                contentDescription = null
+                            )
+                        }
+
+
+                        IconButton(
+                            colors = if(canvas.interactionType == CerveCanvasInteractionType.Eraser) {
+                                IconButtonDefaults.filledIconButtonColors()
+                            } else IconButtonDefaults.iconButtonColors(),
+                            onClick = { canvas.onChangeInteractionType(CerveCanvasInteractionType.Eraser) }
+                        ) {
+                            Icon(
+                                modifier = Modifier,
+                                imageVector = Icons.Default.CleaningServices,
+                                contentDescription = null
+                            )
+                        }
+                        IconButton(canvas::onUndo) {
+                            Icon(
+                                modifier = Modifier,
+                                imageVector = Icons.AutoMirrored.Default.Undo,
+                                contentDescription = null
+                            )
+                        }
+                        IconButton(canvas::onRedo) {
+                            Icon(
+                                modifier = Modifier,
+                                imageVector = Icons.AutoMirrored.Default.Redo,
+                                contentDescription = null
+                            )
+                        }
+                        IconButton(canvas::onClear) {
+                            Icon(
+                                modifier = Modifier,
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null
+                            )
+                        }
+                    }
                 }
+            }
+        ) { innerPadding ->
+            CerveDrawCanvas(
+                modifier = Modifier.padding(innerPadding),
+                stepSize = 50f,
+                strokeWidth = 4.dp,
+                interactionType = canvas.interactionType,
+                eraserLines = canvas.eraserLines,
+                currentLines = canvas.currentLines,
+                currentLineCandidates = canvas.currentLineCandidates
+            )
+        }
+
+        AnimatedVisibility (canvas.interactionType == null) {
+            Card(
+                modifier = Modifier.padding(12.dp)
+            ) {
+                Text(
+                    modifier = Modifier.padding(12.dp),
+                    text = "Please select a draw type"
+                )
             }
         }
     }

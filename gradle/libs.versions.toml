@@ -1,10 +1,12 @@
 [versions]
 androidx-lifecycle = "2.8.4"
-compose-multiplatform = "1.7.0"
+compose-multiplatform = "1.7.3"
 junit = "4.13.2"
 kotlin = "2.1.0"
+ui_canvas_version = "0.0.2"
 
 [libraries]
+ui-canvas = { module = "io.github.cerve-development:ui-canvas", version.ref = "ui_canvas_version" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
